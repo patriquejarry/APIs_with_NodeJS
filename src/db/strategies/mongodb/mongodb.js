@@ -68,15 +68,22 @@ class MongoDB extends ICrud {
 
     async create(item) {
         // MongoDB.connect();
-        const resultCadastrar = await this._schema.create(item);
-        //console.log('resultCadastrar', resultCadastrar);
-        return resultCadastrar;
+        const result = await this._schema.create(item);
+        if (process.env.DEBUG) {
+            console.log('create', result);
+        }
+        return result;
     };
 
     async read(item, skip = 0, limit = 10) {
         // MongoDB.connect();
         try {
-            return await this._schema.find(item).skip(parseInt(skip)).limit(parseInt(limit));
+            const result = await this._schema.find(item).skip(parseInt(skip)).limit(parseInt(limit));
+            if (process.env.DEBUG) {
+                console.log('read', result);
+            }
+            return result;
+
         } catch (err) {
             console.log('DEU RUIM no read', err)
             return null
@@ -85,12 +92,20 @@ class MongoDB extends ICrud {
 
     async update(itemBefore, item) {
         // MongoDB.connect();
-        return await this._schema.updateMany(itemBefore, { $set: item });
+        const result = await this._schema.updateMany(itemBefore, { $set: item });
+        if (process.env.DEBUG) {
+            console.log('update', result);
+        }
+        return result;
     };
 
     async delete(item) {
         // MongoDB.connect();
-        return await this._schema.deleteMany(item);
+        const result = await this._schema.deleteMany(item);
+        if (process.env.DEBUG) {
+            console.log('delete', result);
+        }
+        return result;
     };
 
 };
