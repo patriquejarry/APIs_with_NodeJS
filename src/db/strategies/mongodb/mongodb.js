@@ -1,111 +1,114 @@
-const ICrud = require('../interfaceCrud');
 const Mongoose = require('mongoose');
+const ICrud = require('../interfaceCrud');
 
 const STATUS = {
-    0: 'Desconectado',
-    1: 'Conectado',
-    2: 'Conectando',
-    3: 'Desconectando'
-}
+    0: 'Disconnected',
+    1: 'Connected',
+    2: 'Connecting',
+    3: 'Disconnecting'
+};
 
 class MongoDB extends ICrud {
+
     constructor(connection, schema) {
         super();
         this.connection = connection;
-        this._schema = schema;
+        this.schema = schema;
     }
 
     static async connect() {
-        //if (!this.connection) {
-        //await Mongoose.connect('mongodb://erickwendel:minhasenhasecreta@192.168.99.101:27017/herois',
-        await Mongoose.connect(process.env.MONGODB_URL,
-            { useNewUrlParser: true, useUnifiedTopology: true },
-            function (error) {
-                if (error) {
-                    console.error('Falha na conexao', error);
-                } else {
-                    console.log('Conectou MongoDB!');
+
+        try {
+            await Mongoose.connect(process.env.MONGODB_URL,
+                { useNewUrlParser: true, useUnifiedTopology: true },
+                function (error) {
+                    if (error) {
+                        console.error('MongoDB : Connection fail', error);
+                    } else {
+                        console.log('MongoDB : Connected!');
+                    }
                 }
-            }
-        );
-        const connection = Mongoose.connection;
-        connection.once('open', () => console.log('Database MongoDB rodando'));
-        return connection;
-        //}
-        // this.defineModel();
+            );
+
+            const connection = Mongoose.connection;
+            connection.once('open', () => console.log('MongoDB : Database is running'));
+            return connection;
+
+        } catch (err) {
+            console.log('Unknown error : connect : ', err);
+            return false;
+        }
     }
 
-    // async defineModel() {
-    //     if (!this._schema) {
-    //         const schema = new Mongoose.Schema({
-    //             nome: {
-    //                 type: String,
-    //                 required: true
-    //             },
-    //             poder: {
-    //                 type: String,
-    //                 required: true
-    //             },
-    //             insertedAt: {
-    //                 type: Date,
-    //                 default: new Date()
-    //             }
-    //         });
-
-    //         this._schema = Mongoose.model('heroi', schema, 'herois');
-    //     }
-    // }
-
     async isConnected() {
-        // MongoDB.connect();
-        // const state = this.connection.readyState;
 
-        //if (state === 1 /*'Conectado'*/) return state;
-        //if (state !== 2 /*'Conectando'*/) return state;
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return this.connection.readyState;
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return this.connection.readyState;
+
+        } catch (err) {
+            console.log('Unknown error : isConnected : ', err);
+            return false;
+        }
     }
 
     async create(item) {
-        // MongoDB.connect();
-        const result = await this._schema.create(item);
-        if (process.env.DEBUG) {
-            console.log('create', result);
+
+        try {
+            const result = await this.schema.create(item);
+            if (process.env.DEBUG) {
+                console.log('create', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : create : ', err);
+            return null;
         }
-        return result;
     };
 
     async read(item, skip = 0, limit = 10) {
-        // MongoDB.connect();
         try {
-            const result = await this._schema.find(item).skip(parseInt(skip)).limit(parseInt(limit));
+            const result = await this.schema.find(item).skip(parseInt(skip)).limit(parseInt(limit));
             if (process.env.DEBUG) {
                 console.log('read', result);
             }
             return result;
 
         } catch (err) {
-            console.log('DEU RUIM no read', err)
-            return null
+            console.log('Unknown error : read : ', err);
+            return null;
         }
     };
 
     async update(itemBefore, item) {
-        // MongoDB.connect();
-        const result = await this._schema.updateMany(itemBefore, { $set: item });
-        if (process.env.DEBUG) {
-            console.log('update', result);
+
+        try {
+            const result = await this.schema.updateMany(itemBefore, { $set: item });
+            if (process.env.DEBUG) {
+                console.log('update', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : update : ', err);
+            return null;
         }
-        return result;
     };
 
     async delete(item) {
-        // MongoDB.connect();
-        const result = await this._schema.deleteMany(item);
-        if (process.env.DEBUG) {
-            console.log('delete', result);
+
+        try {
+            const result = await this.schema.deleteMany(item);
+            if (process.env.DEBUG) {
+                console.log('delete', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : delete : ', err);
+            return null;
         }
-        return result;
     };
 
 };

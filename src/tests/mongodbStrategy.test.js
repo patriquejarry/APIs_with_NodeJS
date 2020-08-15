@@ -1,74 +1,68 @@
-/*
-    npm i --save-dev mocha
-*/
-
 const assert = require('assert');
+
 const MongoDB = require('../db/strategies/mongodb/mongodb');
-const HeroiSchema = require('../db/strategies/mongodb/schemas/heroisSchema')
+const HeroesModel = require('../db/strategies/mongodb/schemas/heroesModel')
 const Context = require('../db/strategies/contextStrategy');
 
-//const context = new Context(new MongoDB());
 let context = null;
 
-const MOCK_HEROI_CADASTRAR = {
-    nome: 'Gaviao Negrao',
-    poder: 'Flechas'
+const MOCK_HERO_CREATE = {
+    name: 'Black Hawk',
+    power: 'Arrows'
 };
 
-const MOCK_HEROI_ATUALIZAR_ANTES = {
-    nome: `Robin-${Date.now()}`,
-    poder: 'Nada'
+const MOCK_HERO_UPDATE_BEFORE = {
+    name: `Robin-${Date.now()}`,
+    power: 'No really'
 };
 
-const MOCK_HEROI_ATUALIZAR_DEPOIS = {
-    nome: `Batman-${Date.now()}`,
-    poder: 'Dinheiro'
+const MOCK_HERO_UPDATE_AFTER = {
+    name: `Batman-${Date.now()}`,
+    power: 'Money'
 };
 
-describe('MongoDB Strategy', function () {
+describe('Test Suite for MongoDB Strategy', function () {
 
     this.timeout(Infinity);
     this.beforeAll(async () => {
         const connection = await MongoDB.connect();
-        // console.log('connection', connection)
-        context = new Context(new MongoDB(connection, HeroiSchema));
+        context = new Context(new MongoDB(connection, HeroesModel));
     });
 
     it('MongoDB Connection', async () => {
         const result = await context.isConnected();
-        // console.log('result', result)
         assert.equal(result, 1);
     });
 
-    it('Cadastrar', async () => {
-        const { nome, poder } = await context.create(MOCK_HEROI_CADASTRAR);
-        assert.deepEqual({ nome, poder }, MOCK_HEROI_CADASTRAR);
+    it('Create', async () => {
+        const { name, power } = await context.create(MOCK_HERO_CREATE);
+        assert.deepEqual({ name, power }, MOCK_HERO_CREATE);
     });
 
-    it('Listar', async () => {
-        const [{ nome, poder }] = await context.read({ nome: MOCK_HEROI_CADASTRAR.nome });
-        assert.deepEqual({ nome, poder }, MOCK_HEROI_CADASTRAR);
+    it('Read', async () => {
+        const [{ name, power }] = await context.read({ name: MOCK_HERO_CREATE.name });
+        assert.deepEqual({ name, power }, MOCK_HERO_CREATE);
     });
 
-    it('Atualizar', async () => {
-        // Por Id
+    it('Update', async () => {
+        // By Id
 
-        // Por objeto
-        const { nome, poder } = await context.create(MOCK_HEROI_ATUALIZAR_ANTES);
-        assert.deepEqual({ nome, poder }, MOCK_HEROI_ATUALIZAR_ANTES);
+        // By Object
+        const { name, power } = await context.create(MOCK_HERO_UPDATE_BEFORE);
+        assert.deepEqual({ name, power }, MOCK_HERO_UPDATE_BEFORE);
 
-        const { nModified } = await context.update({ nome, poder }, MOCK_HEROI_ATUALIZAR_DEPOIS);
+        const { nModified } = await context.update({ name, power }, MOCK_HERO_UPDATE_AFTER);
         assert.equal(nModified, 1);
-        const [{ nome: nome2, poder: poder2 }] = await context.read({ nome: MOCK_HEROI_ATUALIZAR_DEPOIS.nome });
-        assert.deepEqual({ nome: nome2, poder: poder2 }, MOCK_HEROI_ATUALIZAR_DEPOIS);
 
+        const [{ name: name2, power: power2 }] = await context.read({ name: MOCK_HERO_UPDATE_AFTER.name });
+        assert.deepEqual({ name: name2, power: power2 }, MOCK_HERO_UPDATE_AFTER);
     });
 
     it('Remover', async () => {
-        const { deletedCount } = await context.delete(MOCK_HEROI_CADASTRAR);
+        const { deletedCount } = await context.delete(MOCK_HERO_CREATE);
         assert.equal(deletedCount, 1);
-        const result2 = await context.read({ nome: MOCK_HEROI_CADASTRAR.nome });
-        assert.equal(result2.length, 0);
+        const result = await context.read({ name: MOCK_HERO_CREATE.name });
+        assert.equal(result.length, 0);
     });
 
 });

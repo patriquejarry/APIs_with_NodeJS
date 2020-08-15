@@ -1,20 +1,19 @@
-const Bcrypt = require('bcrypt')
-const { promisify } = require('util')
+const Bcrypt = require('bcrypt');
+const { promisify } = require('util');
 
-const hashAsync = promisify(Bcrypt.hash)
-const compareAsync = promisify(Bcrypt.compare)
+const hashAsync = promisify(Bcrypt.hash);
+const compareAsync = promisify(Bcrypt.compare);
 
-// const SALT_PWD = 3
-const SALT = parseInt(process.env.SALT_PWD)
+const SALT = parseInt(process.env.SALT_PWD);
 
 class PasswordHelper {
 
     static hashPassword(pass) {
-        return hashAsync(pass, SALT)
+        return hashAsync(pass, SALT);
     }
     static comparePassword(pass, hash) {
-        return compareAsync(pass, hash)
+        return compareAsync(pass, hash);
     }
 }
 
-module.exports = PasswordHelper
+module.exports = PasswordHelper;

@@ -1,8 +1,8 @@
-const { join } = require('path')
+const { join } = require('path');
 
-const BaseRoute = require('./baseRoute')
+const BaseRoutes = require('./baseRoutes');
 
-class UtilRoutes extends BaseRoute {
+class UtilRoutes extends BaseRoutes {
 
     coverage() {
         return {
@@ -19,8 +19,8 @@ class UtilRoutes extends BaseRoute {
                 }
             }
         }
-    }
+    };
 
 }
 
-module.exports = UtilRoutes
+module.exports = UtilRoutes;

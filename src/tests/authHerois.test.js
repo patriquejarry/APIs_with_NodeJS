@@ -1,38 +1,47 @@
-const assert = require('assert')
-const api = require('../api')
-const Context = require('../db/strategies/contextStrategy')
-const Postgres = require('../db/strategies/postgres/postgres')
-const UsuarioSchema = require('../db/strategies/postgres/schemas/usuarioSchemas')
+const assert = require('assert');
+
+const api = require('../api');
+const Context = require('../db/strategies/contextStrategy');
+const Postgres = require('../db/strategies/postgres/postgres');
+const UsersSchema = require('../db/strategies/postgres/schemas/usersSchema');
 
 const USER = {
-    username: 'Xuxadasilva',
+    name: 'Xuxadasilva',
     password: '123'
-}
-
+};
 const USER_DB = {
     ...USER,
     password: '$2b$04$k4fc.GsUSKj56TpPXGVe4.2XmZTlstEWPqz9TxryJAYjCEyH4RFgG'
-}
+};
+const USER_NOT_KNOWN = {
+    name: 'wasnt_me',
+    password: '123'
+};
 
-let context = null;
-let app = {}
+let ctxUsers = null;
+let app = {};
 
-describe('authHerois test suite', function () {
+describe('Test Suite for AUTH Heroes', function () {
+
     this.beforeAll(async () => {
+
         app = await api;
 
-        const connectionPostgres = await Postgres.connect()
-        const model = await Postgres.defineModel(connectionPostgres, UsuarioSchema)
-        context = new Context(new Postgres(connectionPostgres, model));
-        const result = await context.update(null, USER_DB, true)
-    })
+        const cnxPostgres = await Postgres.connect();
+        const modelUsers = await Postgres.defineModel(cnxPostgres, UsersSchema);
+        ctxUsers = new Context(new Postgres(cnxPostgres, modelUsers));
 
-    it('deve obter um token', async () => {
+        // Update password
+        const result = await ctxUsers.update(null, USER_DB, true);
+    });
+
+    it('Create a token POST /login', async () => {
+
         const result = await app.inject({
             method: 'POST',
             url: '/login',
             payload: USER
-        })
+        });
 
         const statusCode = result.statusCode;
         const dados = JSON.parse(result.payload);
@@ -41,21 +50,19 @@ describe('authHerois test suite', function () {
         assert.ok(dados.token.length > 10);
     })
 
-    it('deve retornar nao autorizado ao tentar um login errado', async () => {
+    it('Must return unauthorized for a wrong logon', async () => {
+
         const result = await app.inject({
             method: 'POST',
             url: '/login',
-            payload: {
-                username: 'erickwendel',
-                password: '123'
-            }
-        })
+            payload: USER_NOT_KNOWN
+        });
 
         const statusCode = result.statusCode;
         const dados = JSON.parse(result.payload);
 
         assert.equal(statusCode, 401);
         assert.ok(dados.error, "Unauthorized");
-    })
+    });
 
-})
+});

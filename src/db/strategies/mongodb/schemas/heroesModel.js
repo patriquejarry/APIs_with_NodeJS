@@ -1,11 +1,11 @@
 const Mongoose = require('mongoose');
 
 const schema = new Mongoose.Schema({
-    nome: {
+    name: {
         type: String,
         required: true
     },
-    poder: {
+    power: {
         type: String,
         required: true
     },
@@ -15,4 +15,4 @@ const schema = new Mongoose.Schema({
     }
 });
 
-module.exports = Mongoose.model('heroi', schema, 'herois');
+module.exports = Mongoose.model('heroes', schema, 'heroes');

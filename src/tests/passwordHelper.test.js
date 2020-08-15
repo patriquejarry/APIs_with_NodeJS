@@ -1,21 +1,19 @@
-const assert = require('assert')
-const PasswordHelper = require('../helpers/passwordHelper')
+const assert = require('assert');
 
+const PasswordHelper = require('../helpers/passwordHelper');
 
-const SENHA = 'Erick@32323232'
-const HASH = '$2b$04$XVINKYqlhTt/jBfbUtE7zeFe7NJhA7H0BNVepZmyThq.l.N2c2xwu'
+const MOCK_PASSWORD = 'MyPassword@32323232';
+const MOCK_HASH = '$2b$04$FoMTmK8tbntJw9Deg1p2Juy5XtxAktkQIPnGTpyKRXl9YbmM2SLi6';
 
-describe('UserHelper test suite', function () {
+describe('Test Suite for Password Helper', function () {
 
-    it('Deve gerar um hash a partir de uma senha', async () => {
-        const result = await PasswordHelper.hashPassword(SENHA)
-        // console.log('result', result)
-        assert.ok(result.length > 10)
-    })
+    it('Must generate a hash from password', async () => {
+        const result = await PasswordHelper.hashPassword(MOCK_PASSWORD);
+        assert.ok(result.length > 10);
+    });
 
-    it('Deve comparar uma senha e seu hash', async () => {
-        const result = await PasswordHelper.comparePassword(SENHA, HASH)
-        // console.log('result', result)
-        assert.ok(result)
-    })
-})
+    it('Must compare the password with its hash', async () => {
+        const result = await PasswordHelper.comparePassword(MOCK_PASSWORD, MOCK_HASH);
+        assert.ok(result);
+    });
+});

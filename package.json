@@ -1,14 +1,14 @@
 {
-  "name": "08-multi-db-postgres",
-  "version": "1.0.0",
+  "name": "api_heroes_nodebr",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "cross-env NODE_ENV=prod npm t",
+    "postinstall": "cross-env NODE_ENV=production npm t",
     "test": "nyc --reporter=html mocha --timeout 10000 --exit src/tests/*.js",
     "test:watch": "mocha src/tests/*.js -w",
-    "test:prod": "cross-env NODE_ENV=prod npm t",
-    "prod": "cross-env NODE_ENV=prod pm2-runtime src/api.js"
+    "test:prod": "cross-env NODE_ENV=production npm t",
+    "prod": "cross-env NODE_ENV=production pm2-runtime src/api.js"
   },
   "keywords": [],
   "author": "",

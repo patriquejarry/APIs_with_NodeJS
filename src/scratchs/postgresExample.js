@@ -1,52 +1,52 @@
-/*
-    npm install sequelize pg pg-hstore
-*/
 const Sequelize = require('sequelize');
+
+const { DB_CONFIG } = require('./configs');
+
 const driver = new Sequelize(
     'heroes',
-    'erickwendel',
-    'minhasenhasecreta',
+    DB_CONFIG.username,
+    DB_CONFIG.password,
     {
-        host: '192.168.99.101',
+        host: DB_CONFIG.host,
         dialect: 'postgres',
-        quoteIdentifiers: false,
-        operatorsAliases: false
+        quoteIdentifiers: false
+        //,operatorsAliases: false
     }
 );
 
 async function main() {
 
-    const Herois = driver.define('herois', {
+    const Heroes = driver.define('heroes', {
         id: {
             type: Sequelize.INTEGER,
             required: true,
             primaryKey: true,
             autoIncrement: true
         },
-        nome: {
+        name: {
             type: Sequelize.STRING,
             required: true
         },
-        poder: {
+        power: {
             type: Sequelize.STRING,
             required: true
         }
     }, {
-        tableName: 'TB_HEROIS',
+        tableName: 'TB_HEROES',
         freezeTableName: false,
         timestamps: false
     });
 
-    await Herois.sync();
+    await Heroes.sync();
 
-    // await Herois.create({
-    //     nome: 'Lanterna Verde',
-    //     poder: 'Anel'
+    // await Heroes.create({
+    //     name: 'Green Lantern',
+    //     power: 'Ring'
     // });
 
-    const result = await Herois.findAll({
+    const result = await Heroes.findAll({
         raw: true
-        //, attributes: ['nome']
+        //, attributes: ['name']
     });
     console.log(result);
 };

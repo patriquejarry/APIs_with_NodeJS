@@ -1,125 +1,127 @@
-const assert = require('assert')
-const api = require('./../api')
+const assert = require('assert');
 
-let app = {}
+const api = require('../api');
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ilh1eGFkYXNpbHZhIiwiaWQiOjEsImlhdCI6MTU5Njg3OTEyMH0.bX8h2dq5j4DJ_mVthA0U80MaQgpgkv8qbUdQh4AQ6io'
+let app = {};
+
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiWHV4YWRhc2lsdmEiLCJpZCI6MSwiaWF0IjoxNTk3NDMyOTc2fQ.Eg-_AkO12QkIuh0Qnz0yGg8SWFrCMCVTxA9fZgITn-g';
 const headers = {
     Authorization: TOKEN
-}
-const MOCK_HEROI_CADASTRAR = {
-    nome: 'Chapolin Colorado',
-    poder: 'Marreta Bionica'
-}
-const MOCK_HEROI_INICIAL = {
-    nome: 'Gaviao Negro',
-    poder: 'A Mira'
-}
-let MOCK_ID = ''
+};
+const MOCK_HERO_CREATE = {
+    name: 'Wonder Woman',
+    power: 'The Lasso of Truth'
+};
+const MOCK_HERO_INICIAL = {
+    name: 'Black Hawk',
+    power: 'The sight'
+};
+const MOCK_HERO_FINAL = {
+    power: 'Super sight'
+};
+let MOCK_ID = '';
 
-describe('Suite de tests da API Heroes', function () {
+describe('Test Suite for API Heroes', function () {
 
     this.timeout(10000);
     this.beforeAll(async () => {
-        app = await api
 
-        const result = await app.inject({
-            method: 'POST',
-            url: '/herois',
-            headers,
-            payload: JSON.stringify(MOCK_HEROI_INICIAL)
-        })
+        app = await api;
 
-        const dados = JSON.parse(result.payload)
-        MOCK_ID = dados._id
+        for (let v of [0, 1, 2]) {
 
-    })
+            const hero = { ...MOCK_HERO_INICIAL };
+            hero.name = hero.name + '-' + v;
 
-    it('listar /herois', async () => {
+            const result = await app.inject({
+                method: 'POST',
+                url: '/heroes',
+                headers,
+                payload: JSON.stringify(hero)
+            });
 
-        const result = await app.inject({
-            method: 'GET',
-            url: '/herois',
-            headers
-        })
-
-        const statusCode = result.statusCode
-        const dados = JSON.parse(result.payload)
-
-        assert.equal(statusCode, 200)
-        assert.ok(Array.isArray(dados))
-    })
-
-    it('listar /herois - deve retornar os 10 primeiros', async () => {
-
-        const result = await app.inject({
-            method: 'GET',
-            url: `/herois?skip=0&limit=2&nome=${MOCK_HEROI_INICIAL.nome}`,
-            headers
-        })
-
-        const statusCode = result.statusCode
-        const dados = JSON.parse(result.payload)
-
-        assert.equal(statusCode, 200)
-        assert.ok(Array.isArray(dados))
-        assert.ok(dados.length >= 1)
-    })
-
-    it('Cadastrar POST /herois', async () => {
-
-        const result = await app.inject({
-            method: 'POST',
-            url: '/herois',
-            headers,
-            payload: JSON.stringify(MOCK_HEROI_CADASTRAR)
-        })
-
-        //console.log('result', result)
-        const statusCode = result.statusCode
-        const { _id, message } = JSON.parse(result.payload)
-
-        assert.equal(statusCode, 200)
-        assert.notStrictEqual(_id, undefined)
-        assert.equal(message, 'Heroi cadastrado com sucesso!')
-    })
-
-    it('Cadastrar PATCH /herois/{id}', async () => {
-        const MOCK_HEROI_PODER_FINAL = {
-            poder: 'Super Mira'
+            const dados = JSON.parse(result.payload);
+            MOCK_ID = dados._id;
         }
+    });
+
+    it('Read GET /heroes', async () => {
+
+        const result = await app.inject({
+            method: 'GET',
+            url: '/heroes',
+            headers
+        });
+
+        const statusCode = result.statusCode;
+        const dados = JSON.parse(result.payload);
+
+        assert.equal(statusCode, 200);
+        assert.ok(Array.isArray(dados));
+        assert.ok(dados.length > 2);
+    });
+
+    it('Read GET /heroes - Should return only 2', async () => {
+
+        const result = await app.inject({
+            method: 'GET',
+            url: `/heroes?skip=0&limit=2&name=${MOCK_HERO_INICIAL.name}`,
+            headers
+        });
+
+        const statusCode = result.statusCode;
+        const dados = JSON.parse(result.payload);
+
+        assert.equal(statusCode, 200);
+        assert.ok(Array.isArray(dados));
+        assert.ok(dados.length === 2);
+    })
+
+    it('Create POST /heroes', async () => {
+
+        const result = await app.inject({
+            method: 'POST',
+            url: '/heroes',
+            headers,
+            payload: JSON.stringify(MOCK_HERO_CREATE)
+        });
+
+        const statusCode = result.statusCode;
+        const { _id, message } = JSON.parse(result.payload);
+
+        assert.equal(statusCode, 200);
+        assert.notStrictEqual(_id, undefined);
+        assert.equal(message, 'Hero created with success !');
+    });
+
+    it('Update PATCH /heroes/{id}', async () => {
         const result = await app.inject({
             method: 'PATCH',
-            url: `/herois/${MOCK_ID}`,
+            url: `/heroes/${MOCK_ID}`,
             headers,
-            payload: JSON.stringify(MOCK_HEROI_PODER_FINAL)
-        })
+            payload: JSON.stringify(MOCK_HERO_FINAL)
+        });
 
-        // console.log('result', result)
-        const statusCode = result.statusCode
-        const dados = JSON.parse(result.payload)
+        const statusCode = result.statusCode;
+        const dados = JSON.parse(result.payload);
 
-        assert.equal(statusCode, 200)
-        assert.equal(dados.message, 'Heroi atualizado com sucesso!')
-        // assert.equal(result._id, MOCK_ID)
-        // assert.deepEqual(result, MOCK_HEROI_ATUALIZAR_INICIAL)
-    })
+        assert.equal(statusCode, 200);
+        assert.equal(dados.message, 'Hero updated with success !');
+    });
 
-    it('Cadastrar DELETE /herois/{id}', async () => {
+    it('Remove DELETE /heroes/{id}', async () => {
 
         const result = await app.inject({
             method: 'DELETE',
-            url: `/herois/${MOCK_ID}`,
+            url: `/heroes/${MOCK_ID}`,
             headers
-        })
+        });
 
-        // console.log('result', result)
-        const statusCode = result.statusCode
-        const dados = JSON.parse(result.payload)
+        const statusCode = result.statusCode;
+        const dados = JSON.parse(result.payload);
 
-        assert.equal(statusCode, 200)
-        assert.equal(dados.message, 'Heroi removido com sucesso!')
-        // assert.equal(result._id, MOCK_ID)
-    })
+        assert.equal(statusCode, 200);
+        assert.equal(dados.message, 'Hero removed with success !');
+    });
 
 })

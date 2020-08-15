@@ -1,111 +1,119 @@
-const ICrud = require('../interfaceCrud');
 const Sequelize = require('sequelize');
 
+const ICrud = require('../interfaceCrud');
+
 class Postgres extends ICrud {
+
     constructor(connection, schema) {
         super();
-        this._connection = connection;
-        this._schema = schema;
+        this.connection = connection;
+        this.schema = schema;
     }
 
     static connect() {
-        if (!this._connection) {
-            // this._connection = new Sequelize(
-            //     'heroes',
-            //     'erickwendel',
-            //     'minhasenhasecreta',
-            //     {
-            //         host: '192.168.99.101',
-            //         dialect: 'postgres',
-            //         quoteIdentifiers: false,
-            //         operatorsAliases: false,
-            //         logging: false
-            //     }
-            // );
-            this._connection = new Sequelize(process.env.POSTGRES_URL,
-                {
-                    quoteIdentifiers: false,
-                    //operatorsAliases: false,
-                    logging: false,
-                    ssl: process.env.SSL_DB,
-                    dialectOptions: {
-                        ssl: process.env.SSL_DB
-                    }
+
+        try {
+            this.connection = new Sequelize(process.env.POSTGRES_URL, {
+                //operatorsAliases: false,
+                quoteIdentifiers: false,
+                logging: false,
+                ssl: process.env.SSL_DB,
+                dialectOptions: {
+                    ssl: process.env.SSL_DB
                 }
-            );
+            });
+            return this.connection;
+
+        } catch (err) {
+            console.log('Unknown error : connect : ', err);
+            return null;
         }
-        return this._connection;
-        // this.defineModel();
     }
 
     static async defineModel(connectionPostgres, schema) {
-        if (!this._schema) {
-            this._schema = connectionPostgres.define(schema.name, schema.schema, schema.options);
-            await this._schema.sync();
+
+        try {
+            this.schema = connectionPostgres.define(schema.name, schema.schema, schema.options);
+            await this.schema.sync();
+            return this.schema;
+
+        } catch (err) {
+            console.log('Unknown error : defineModel : ', err)
+            return null;
         }
-        return this._schema
     }
 
-    // async defineModel() {
-    //     if (!this._schema) {
-    //         this._schema = this._connection.define('herois', {
-    //             id: {
-    //                 type: Sequelize.INTEGER,
-    //                 required: true,
-    //                 primaryKey: true,
-    //                 autoIncrement: true
-    //             },
-    //             nome: {
-    //                 type: Sequelize.STRING,
-    //                 required: true
-    //             },
-    //             poder: {
-    //                 type: Sequelize.STRING,
-    //                 required: true
-    //             }
-    //         }, {
-    //             tableName: 'TB_HEROIS',
-    //             freezeTableName: false,
-    //             timestamps: false
-    //         });
-
-    //         // await this._schema.sync();
-    //     }
-    // }
-
     async isConnected() {
-        Postgres.connect();
+
         try {
-            await this._connection.authenticate();
+            await this.connection.authenticate();
             return true;
 
-        } catch (error) {
-            console.log('fail !', error);
+        } catch (err) {
+            console.log('Unknown error : isConnected : ', err);
             return false;
         }
     }
 
     async create(item) {
-        Postgres.connect();
-        const { dataValues } = await this._schema.create(item);
-        return dataValues;
+
+        try {
+            const { dataValues: result } = await this.schema.create(item);
+            if (process.env.DEBUG) {
+                console.log('create', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : create : ', err);
+            return null;
+        }
     };
 
     async read(item) {
-        Postgres.connect();
-        // console.log('item', item)
-        return await this._schema.findAll({ where: item, raw: true });
+
+        try {
+            const result = await this.schema.findAll({ where: item, raw: true });
+            if (process.env.DEBUG) {
+                console.log('read', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : read : ', err);
+            return null;
+        }
     };
 
     async update(itemBefore, item, upsert = false) {
-        Postgres.connect();
-        const fn = upsert ? 'upsert' : 'update'
-        return await this._schema[fn](item, { where: itemBefore });
+
+        try {
+            const fn = upsert ? 'upsert' : 'update'
+            const result = await this.schema[fn](item, { where: itemBefore });
+            if (process.env.DEBUG) {
+                console.log('update', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : update : ', err)
+            return null;
+        }
     };
 
     async delete(item) {
-        Postgres.connect();
-        return await this._schema.destroy({ where: item });
+
+        try {
+            const result = await this.schema.destroy({ where: item });
+            if (process.env.DEBUG) {
+                console.log('delete', result);
+            }
+            return result;
+
+        } catch (err) {
+            console.log('Unknown error : delete : ', err);
+            return null;
+        }
     };
 
 };
