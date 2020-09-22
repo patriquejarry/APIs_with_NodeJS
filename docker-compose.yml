@@ -1,0 +1,40 @@
+version: "3.7"
+services: 
+    db1: 
+        image: postgres
+        container_name: postgres
+        environment: 
+            - POSTGRES_USER=patrique
+            - POSTGRES_PASSWORD=minhasenhasecreta
+            - POSTGRES_DB=heroes
+        ports: 
+            - "5432:5432"
+        restart: always
+    db1_client:
+        image: adminer
+        container_name: adminer
+        restart: always
+        ports: 
+            - "8080:8080"
+        depends_on: 
+            - db1
+    db2: 
+        image: mongo:4
+        container_name: mongodb
+        environment: 
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=senhaadmin
+        ports: 
+            - "27017:27017"
+        restart: always
+        #command: mongo --host localhost -u admin -p senhaadmin --authenticationDatabase admin --eval "db.getSiblingDB('heroes').createUser({user: 'patrique', pwd: 'minhasenhasecreta', roles: [{role: 'readWrite', db: 'heroes'}]})"
+    db2_client:
+        image: mongoclient/mongoclient
+        container_name: mongoclient
+        restart: always
+        #volumes: 
+        #    - ./db2_client:/data/db
+        ports: 
+            - "3000:3000"
+        depends_on: 
+            - db2
